@@ -1,4 +1,5 @@
 import json
+
 from app.database import load_vault, save_vault
 
 
@@ -18,6 +19,34 @@ def create_entry(
     }
 
 
+def is_valid_entry(
+    website: str,
+    username: str,
+    password: str,
+) -> bool:
+    """Return True when all required entry fields are present."""
+
+    return bool(
+        website.strip()
+        and username.strip()
+        and password
+    )
+
+
+def entry_already_exists(
+    entries: list[dict[str, str]],
+    website: str,
+    username: str,
+) -> bool:
+    """Check whether the website and username already exist together."""
+
+    return any(
+        entry["website"].casefold() == website.casefold()
+        and entry["username"].casefold() == username.casefold()
+        for entry in entries
+    )
+
+
 def serialize_entries(entries: list[dict[str, str]]) -> bytes:
     """Convert vault entries into bytes ready for encryption."""
 
@@ -28,6 +57,7 @@ def deserialize_entries(data: bytes) -> list[dict[str, str]]:
     """Convert decrypted vault bytes back into entries."""
 
     return json.loads(data.decode("utf-8"))
+
 
 def save_entries(
     master_password: str,

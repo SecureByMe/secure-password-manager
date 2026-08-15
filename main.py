@@ -2,7 +2,13 @@ from getpass import getpass
 
 from cryptography.exceptions import InvalidTag
 
-from app.vault import create_entry, load_entries, save_entries
+from app.vault import (
+    create_entry,
+    entry_already_exists,
+    is_valid_entry,
+    load_entries,
+    save_entries,
+)
 
 
 def show_entries(entries: list[dict[str, str]]) -> None:
@@ -31,17 +37,11 @@ def add_entry(
     password = getpass("Password to save: ")
     notes = input("Notes (optional): ").strip()
 
-    if not website or not username or not password:
+    if not is_valid_entry(website, username, password):
         print("\nWebsite, username, and password are required.")
         return
 
-    duplicate_exists = any(
-        entry["website"].casefold() == website.casefold()
-        and entry["username"].casefold() == username.casefold()
-        for entry in entries
-    )
-
-    if duplicate_exists:
+    if entry_already_exists(entries, website, username):
         print("\nAn entry for this website and username already exists.")
         return
 

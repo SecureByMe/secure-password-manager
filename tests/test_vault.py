@@ -1,7 +1,8 @@
-from app.vault import create_entry, deserialize_entries, serialize_entries
 from app.vault import (
     create_entry,
     deserialize_entries,
+    entry_already_exists,
+    is_valid_entry,
     load_entries,
     save_entries,
     serialize_entries,
@@ -35,6 +36,8 @@ def test_entries_can_be_serialized_and_deserialized():
     restored_entries = deserialize_entries(encrypted_ready_data)
 
     assert restored_entries == entries
+
+
 def test_entries_can_be_saved_and_loaded(tmp_path, monkeypatch):
     database_path = tmp_path / "test_vault.db"
 
@@ -59,4 +62,38 @@ def test_entries_can_be_saved_and_loaded(tmp_path, monkeypatch):
     loaded_entries = load_entries(master_password)
 
     assert loaded_entries == entries
+
+
+def test_valid_entry_requires_website_username_and_password():
+    assert is_valid_entry(
+        "example.com",
+        "alice@example.com",
+        "secret-password",
+    )
+
+    assert not is_valid_entry("", "alice@example.com", "secret-password")
+    assert not is_valid_entry("example.com", "", "secret-password")
+    assert not is_valid_entry("example.com", "alice@example.com", "")
+
+
+def test_entry_already_exists_uses_website_and_username():
+    entries = [
+        create_entry(
+            "example.com",
+            "alice@example.com",
+            "secret-password",
+        )
+    ]
+
+    assert entry_already_exists(
+        entries,
+        "EXAMPLE.COM",
+        "alice@example.com",
+    )
+
+    assert not entry_already_exists(
+        entries,
+        "example.com",
+        "another@example.com",
+    )
     
