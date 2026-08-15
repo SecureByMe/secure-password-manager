@@ -20,6 +20,43 @@ def show_entries(entries: list[dict[str, str]]) -> None:
         print(f"   Notes: {entry['notes']}")
 
 
+def add_entry(
+    entries: list[dict[str, str]],
+    master_password: str,
+) -> None:
+    """Add a new validated password entry."""
+
+    website = input("Website: ").strip()
+    username = input("Username: ").strip()
+    password = getpass("Password to save: ")
+    notes = input("Notes (optional): ").strip()
+
+    if not website or not username or not password:
+        print("\nWebsite, username, and password are required.")
+        return
+
+    duplicate_exists = any(
+        entry["website"].casefold() == website.casefold()
+        and entry["username"].casefold() == username.casefold()
+        for entry in entries
+    )
+
+    if duplicate_exists:
+        print("\nAn entry for this website and username already exists.")
+        return
+
+    entries.append(create_entry(
+        website,
+        username,
+        password,
+        notes,
+    ))
+
+    save_entries(master_password, entries)
+
+    print("\nEntry encrypted and saved.")
+
+
 def reveal_password(entries: list[dict[str, str]]) -> None:
     """Reveal the password for one selected entry."""
 
@@ -28,7 +65,6 @@ def reveal_password(entries: list[dict[str, str]]) -> None:
         return
 
     show_entries(entries)
-
     choice = input("\nEntry number to reveal: ")
 
     try:
@@ -51,7 +87,6 @@ def edit_entry(
         return
 
     show_entries(entries)
-
     choice = input("\nEntry number to edit: ")
 
     try:
@@ -117,7 +152,6 @@ def delete_entry(
         return
 
     show_entries(entries)
-
     choice = input("\nEntry number to delete: ")
 
     try:
@@ -166,17 +200,7 @@ def main() -> None:
         choice = input("\nChoose an option: ")
 
         if choice == "1":
-            website = input("Website: ")
-            username = input("Username: ")
-            password = getpass("Password to save: ")
-            notes = input("Notes (optional): ")
-
-            entries.append(create_entry(
-                website, username, password, notes
-            ))
-            save_entries(master_password, entries)
-
-            print("\nEntry encrypted and saved.")
+            add_entry(entries, master_password)
 
         elif choice == "2":
             show_entries(entries)
