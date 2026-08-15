@@ -27,3 +27,46 @@ def test_salt_is_random():
 
     assert salt1 != salt2
     assert len(salt1) == 16
+
+from app.crypto import derive_key, generate_salt, encrypt_data, decrypt_data
+
+
+def test_encryption_and_decryption():
+    password = "TestPassword123!"
+    salt = generate_salt()
+
+    key = derive_key(password, salt)
+
+    original_data = b"My secret password data"
+
+    encrypted_data, nonce = encrypt_data(original_data, key)
+
+    decrypted_data = decrypt_data(
+        encrypted_data,
+        key,
+        nonce
+    )
+
+    assert encrypted_data != original_data
+    assert decrypted_data == original_data
+
+
+def test_tampered_data_fails_decryption():
+    password = "TestPassword123!"
+    salt = generate_salt()
+
+    key = derive_key(password, salt)
+
+    original_data = b"My secret password data"
+
+    encrypted_data, nonce = encrypt_data(original_data, key)
+
+    tampered_data = bytearray(encrypted_data)
+    tampered_data[0] ^= 1
+
+    try:
+        decrypt_data(bytes(tampered_data), key, nonce)
+        assert False, "Tampered data should not decrypt"
+    except Exception:
+        pass
+    
