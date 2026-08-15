@@ -47,6 +47,29 @@ def entry_already_exists(
     )
 
 
+def search_entries(
+    entries: list[dict[str, str]],
+    query: str,
+) -> list[dict[str, str]]:
+    """Find entries by website or username."""
+
+    search_text = query.strip().casefold()
+
+    if not search_text:
+        return []
+
+    matches = []
+
+    for entry in entries:
+        website_matches = search_text in entry["website"].casefold()
+        username_matches = search_text in entry["username"].casefold()
+
+        if website_matches or username_matches:
+            matches.append(entry)
+
+    return matches
+
+
 def serialize_entries(entries: list[dict[str, str]]) -> bytes:
     """Convert vault entries into bytes ready for encryption."""
 
@@ -78,3 +101,4 @@ def load_entries(master_password: str) -> list[dict[str, str]]:
         return []
 
     return deserialize_entries(data)
+

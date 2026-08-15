@@ -5,6 +5,7 @@ from app.vault import (
     is_valid_entry,
     load_entries,
     save_entries,
+    search_entries,
     serialize_entries,
 )
 
@@ -96,4 +97,16 @@ def test_entry_already_exists_uses_website_and_username():
         "example.com",
         "another@example.com",
     )
+
+
+def test_search_entries_finds_website_or_username():
+    entries = [
+        create_entry("example.com", "alice@example.com", "password-1"),
+        create_entry("github.com", "bob@github.com", "password-2"),
+    ]
+
+    assert search_entries(entries, "EXAMPLE") == [entries[0]]
+    assert search_entries(entries, "bob") == [entries[1]]
+    assert search_entries(entries, "missing") == []
+    assert search_entries(entries, "") == []
     
