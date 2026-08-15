@@ -1,6 +1,7 @@
 from getpass import getpass
 
 from cryptography.exceptions import InvalidTag
+from app.generator import generate_password
 
 from app.vault import (
     create_entry,
@@ -24,6 +25,27 @@ def show_entries(entries: list[dict[str, str]]) -> None:
         print(f"\n{number}. Website: {entry['website']}")
         print(f"   Username: {entry['username']}")
         print(f"   Notes: {entry['notes']}")
+def get_password_for_new_entry() -> str:
+    """Ask whether to generate a password or enter one manually."""
+
+    choice = input("Generate a secure password? (y/n): ").strip().lower()
+
+    if choice != "y":
+        return getpass("Password to save: ")
+
+    length_text = input("Password length [16]: ").strip()
+
+    try:
+        length = int(length_text) if length_text else 16
+        password = generate_password(length)
+    except ValueError:
+        print("\nInvalid length. Using 16 characters.")
+        password = generate_password()
+
+    print(f"\nGenerated password: {password}")
+
+    return password
+        
 
 
 def add_entry(
@@ -34,7 +56,7 @@ def add_entry(
 
     website = input("Website: ").strip()
     username = input("Username: ").strip()
-    password = getpass("Password to save: ")
+    password = get_password_for_new_entry()
     notes = input("Notes (optional): ").strip()
 
     if not is_valid_entry(website, username, password):
@@ -230,4 +252,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    
