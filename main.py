@@ -32,13 +32,54 @@ def reveal_password(entries: list[dict[str, str]]) -> None:
     choice = input("\nEntry number to reveal: ")
 
     try:
-        entry_number = int(choice)
-        entry = entries[entry_number - 1]
+        entry = entries[int(choice) - 1]
     except (ValueError, IndexError):
         print("\nInvalid entry number.")
         return
 
     print(f"\nPassword for {entry['website']}: {entry['password']}")
+
+
+def edit_entry(
+    entries: list[dict[str, str]],
+    master_password: str,
+) -> None:
+    """Edit one selected vault entry."""
+
+    if not entries:
+        print("\nYour vault is empty.\n")
+        return
+
+    show_entries(entries)
+
+    choice = input("\nEntry number to edit: ")
+
+    try:
+        entry = entries[int(choice) - 1]
+    except (ValueError, IndexError):
+        print("\nInvalid entry number.")
+        return
+
+    website = input(f"Website [{entry['website']}]: ").strip()
+    username = input(f"Username [{entry['username']}]: ").strip()
+    password = getpass("New password (leave blank to keep current): ")
+    notes = input(f"Notes [{entry['notes']}]: ").strip()
+
+    if website:
+        entry["website"] = website
+
+    if username:
+        entry["username"] = username
+
+    if password:
+        entry["password"] = password
+
+    if notes:
+        entry["notes"] = notes
+
+    save_entries(master_password, entries)
+
+    print("\nEntry updated and encrypted.")
 
 
 def delete_entry(
@@ -93,8 +134,9 @@ def main() -> None:
         print("\n1. Add password entry")
         print("2. List password entries")
         print("3. Reveal a password")
-        print("4. Delete an entry")
-        print("5. Exit")
+        print("4. Edit an entry")
+        print("5. Delete an entry")
+        print("6. Exit")
 
         choice = input("\nChoose an option: ")
 
@@ -118,14 +160,17 @@ def main() -> None:
             reveal_password(entries)
 
         elif choice == "4":
-            delete_entry(entries, master_password)
+            edit_entry(entries, master_password)
 
         elif choice == "5":
+            delete_entry(entries, master_password)
+
+        elif choice == "6":
             print("\nVault closed.")
             break
 
         else:
-            print("\nPlease choose 1, 2, 3, 4, or 5.")
+            print("\nPlease choose 1, 2, 3, 4, 5, or 6.")
 
 
 if __name__ == "__main__":
