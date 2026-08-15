@@ -41,6 +41,41 @@ def reveal_password(entries: list[dict[str, str]]) -> None:
     print(f"\nPassword for {entry['website']}: {entry['password']}")
 
 
+def delete_entry(
+    entries: list[dict[str, str]],
+    master_password: str,
+) -> None:
+    """Delete one selected vault entry after confirmation."""
+
+    if not entries:
+        print("\nYour vault is empty.\n")
+        return
+
+    show_entries(entries)
+
+    choice = input("\nEntry number to delete: ")
+
+    try:
+        entry_number = int(choice)
+        entry = entries[entry_number - 1]
+    except (ValueError, IndexError):
+        print("\nInvalid entry number.")
+        return
+
+    confirmation = input(
+        f"Type DELETE to remove {entry['website']}: "
+    )
+
+    if confirmation != "DELETE":
+        print("\nDeletion cancelled.")
+        return
+
+    entries.pop(entry_number - 1)
+    save_entries(master_password, entries)
+
+    print("\nEntry deleted.")
+
+
 def main() -> None:
     """Run the SecureVault command-line menu."""
 
@@ -58,7 +93,8 @@ def main() -> None:
         print("\n1. Add password entry")
         print("2. List password entries")
         print("3. Reveal a password")
-        print("4. Exit")
+        print("4. Delete an entry")
+        print("5. Exit")
 
         choice = input("\nChoose an option: ")
 
@@ -82,13 +118,15 @@ def main() -> None:
             reveal_password(entries)
 
         elif choice == "4":
+            delete_entry(entries, master_password)
+
+        elif choice == "5":
             print("\nVault closed.")
             break
 
         else:
-            print("\nPlease choose 1, 2, 3, or 4.")
+            print("\nPlease choose 1, 2, 3, 4, or 5.")
 
 
 if __name__ == "__main__":
     main()
-    
