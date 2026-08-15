@@ -82,6 +82,30 @@ def edit_entry(
     print("\nEntry updated and encrypted.")
 
 
+def change_master_password(
+    entries: list[dict[str, str]],
+    current_master_password: str,
+) -> str:
+    """Re-encrypt the vault using a new master password."""
+
+    new_master_password = getpass("New master password: ")
+    confirm_password = getpass("Confirm new master password: ")
+
+    if not new_master_password:
+        print("\nMaster password cannot be empty.")
+        return current_master_password
+
+    if new_master_password != confirm_password:
+        print("\nPasswords do not match. Nothing was changed.")
+        return current_master_password
+
+    save_entries(new_master_password, entries)
+
+    print("\nMaster password changed. Vault re-encrypted.")
+
+    return new_master_password
+
+
 def delete_entry(
     entries: list[dict[str, str]],
     master_password: str,
@@ -136,7 +160,8 @@ def main() -> None:
         print("3. Reveal a password")
         print("4. Edit an entry")
         print("5. Delete an entry")
-        print("6. Exit")
+        print("6. Change master password")
+        print("7. Exit")
 
         choice = input("\nChoose an option: ")
 
@@ -166,12 +191,19 @@ def main() -> None:
             delete_entry(entries, master_password)
 
         elif choice == "6":
+            master_password = change_master_password(
+                entries,
+                master_password,
+            )
+
+        elif choice == "7":
             print("\nVault closed.")
             break
 
         else:
-            print("\nPlease choose 1, 2, 3, 4, 5, or 6.")
+            print("\nPlease choose a number from 1 to 7.")
 
 
 if __name__ == "__main__":
     main()
+    
